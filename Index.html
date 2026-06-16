@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programação 13/06/2026</title>
+<style>
+  :root {
+    --bg:        #080F1A;
+    --surface:   #0E1C2F;
+    --card:      #111E33;
+    --card2:     #0C1828;
+
+    --pax:       #3B9EFF;
+    --pax-glow:  rgba(59,158,255,0.15);
+    --carga:     #FF9A3C;
+    --carga-glow:rgba(255,154,60,0.15);
+    --remocao:   #FF4D6A;
+    --remocao-glow:rgba(255,77,106,0.15);
+
+    --caravan:   #2DD4BF;
+    --cessna:    #A78BFA;
+    --gold:      #F5C542;
+
+    --text:      #E8F0FE;
+    --sub:       #8BA8C8;
+    --faint:     #3D567A;
+    --radius:    12px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 16px 12px 48px;
+  }
+
+  .page { max-width: 480px; margin: 0 auto; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0E2040 0%, #142D55 100%);
+    border: 1px solid var(--faint);
+    border-radius: 16px;
+    text-align: center;
+    padding: 22px 16px 18px;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(59,158,255,0.12) 0%, transparent 70%);
+  }
+  .header-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+  .header-date {
+    font-size: 13px;
+    color: var(--sub);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .header-planes {
+    margin-top: 10px;
+    font-size: 20px;
+    letter-spacing: 8px;
+    opacity: 0.35;
+  }
+
+  /* ── AIRCRAFT SECTION ── */
+  .ac-block { margin-bottom: 26px; }
+
+  .ac-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 1px;
+  }
+  .ac-header.cessna  { background: linear-gradient(90deg, #2A1F5A 0%, #1A1540 100%); border-bottom: 2px solid var(--cessna); }
+  .ac-header.caravan { background: linear-gradient(90deg, #0D2E2A 0%, #0A1E1C 100%); border-bottom: 2px solid var(--caravan); }
+
+  .ac-icon { font-size: 18px; }
+  .ac-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+  .ac-name.cessna  { color: var(--cessna); }
+  .ac-name.caravan { color: var(--caravan); }
+  .ac-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--sub);
+    background: rgba(255,255,255,0.06);
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* ── CLIENT SUBSECTION ── */
+  .client-block {
+    background: var(--surface);
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .client-label {
+    padding: 7px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sub);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* ── FLIGHT CARD ── */
+  .flight-card {
+    display: flex;
+    gap: 0;
+    background: var(--card);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    position: relative;
+    transition: background 0.2s;
+  }
+  .flight-card:last-child { border-bottom: none; }
+
+  .type-bar {
+    width: 4px;
+    flex-shrink: 0;
+    border-radius: 0;
+  }
+  .type-bar.pax     { background: var(--pax); }
+  .type-bar.carga   { background: var(--carga); }
+  .type-bar.remocao { background: var(--remocao); animation: pulse-remocao 1.2s ease-in-out infinite; }
+
+  @keyframes pulse-remocao {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  .card-body {
+    flex: 1;
+    padding: 11px 13px;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 7px;
+    flex-wrap: wrap;
+  }
+
+  .type-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .type-badge.pax     { background: var(--pax-glow);     color: var(--pax);     border: 1px solid rgba(59,158,255,0.4); }
+  .type-badge.carga   { background: var(--carga-glow);   color: var(--carga);   border: 1px solid rgba(255,154,60,0.4); }
+  .type-badge.remocao { background: var(--remocao-glow); color: var(--remocao); border: 1px solid rgba(255,77,106,0.4); animation: pulse-remocao 1.2s ease-in-out infinite; }
+
+  .card-reg {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .card-reg.tbd { color: var(--faint); letter-spacing: 1px; }
+
+  .card-num {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--gold);
+    background: rgba(245,197,66,0.1);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid rgba(245,197,66,0.25);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .card-num:hover {
+    background: rgba(245,197,66,0.2);
+    transform: scale(1.03);
+  }
+
+  .card-crew {
+    font-size: 12px;
+    color: var(--sub);
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .crew-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--sub);
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .card-route {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 7px;
+  }
+  .rpt {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+  .rpt.home {
+    background: rgba(59,158,255,0.1);
+    color: var(--pax);
+  }
+  .rarrow {
+    font-size: 9px;
+    color: var(--faint);
+  }
+  .repeat-marker {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gold);
+    background: rgba(245,197,66,0.15);
+    padding: 1px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(245,197,66,0.4);
+    letter-spacing: 0.5px;
+  }
+
+  .card-obs {
+    font-size: 11px;
+    color: #7A9EC0;
+    line-height: 1.5;
+    padding-top: 7px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* ── PEOPLE SECTIONS ── */
+  .people-section {
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .people-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .people-header.coord       { background: #1A1F3A; color: #9B8FFF; border-bottom: 2px solid #4A3FA0; }
+  .people-header.stand-voare { background: #0F2030; color: var(--pax); border-bottom: 2px solid #1E5080; }
+  .people-header.stand-gen   { background: #0F1E10; color: #4ADE80; border-bottom: 2px solid #1A5020; }
+
+  .people-body {
+    background: var(--surface);
+    padding: 12px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .person-chip {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 20px;
+  }
+  .person-chip.coord       { background: rgba(155,143,255,0.12); color: #C4BDFF; border: 1px solid rgba(155,143,255,0.25); }
+  .person-chip.stand-voare { background: rgba(59,158,255,0.1);   color: #7EC8FF; border: 1px solid rgba(59,158,255,0.2); }
+  .person-chip.stand-gen   { background: rgba(74,222,128,0.1);   color: #86EFAC; border: 1px solid rgba(74,222,128,0.2); }
+
+  .footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--faint);
+    border-radius: var(--radius);
+    max-width: 400px;
+    width: 100%;
+    padding: 24px 20px 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+  }
+  .modal-overlay.active .modal-box {
+    transform: scale(1);
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--faint);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .modal-close:hover { color: #fff; }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+  .modal-detail {
+    font-size: 14px;
+    color: var(--sub);
+    line-height: 1.7;
+  }
+  .modal-detail strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .modal-detail .highlight {
+    color: var(--gold);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">📋 Demanda Operacional</div>
+  <div class="header-title">PROGRAMAÇÃO</div>
+  <div class="header-date">13 de Junho de 2026</div>
+  <div class="header-planes">✈ ✈ ✈</div>
+</div>
+
+<!-- ══════════════ CESSNA ══════════════ -->
+<div class="ac-block">
+  <div class="ac-header cessna">
+    <span class="ac-icon">✈️</span>
+    <span class="ac-name cessna">Cessna 206 / 210</span>
+    <span class="ac-count">15 voos</span>
+  </div>
+  <div class="client-block">
+    <div class="client-label">✦ Yanomami</div>
+
+    <!-- #31 Remoção -->
+    <div class="flight-card" data-oma="31" data-tipo="Remoção" data-reg="KON" data-trip="Otto" data-rota="Swpd › Kuratanha › Swpd" data-obs="Vai levando profissional SESAI.">
+      <div class="type-bar remocao"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge remocao">🚑 Remoção</span>
+          <span class="card-reg">KON</span>
+          <span class="card-num" data-oma="31">#31</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Otto</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Kuratanha</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando profissional SESAI.</div>
+      </div>
+    </div>
+
+    <!-- #31 Carga (mesmo número, mas é outro voo) -->
+    <div class="flight-card" data-oma="31b" data-tipo="Carga" data-reg="KON" data-trip="Otto" data-rota="Swpd › Waharo › Swpd" data-obs="Vai levando carga (QAV) para o Waharo.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">KON</span>
+          <span class="card-num" data-oma="31b">#31</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Otto</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Waharo</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga (QAV) para o Waharo.</div>
+      </div>
+    </div>
+
+    <!-- #3194 Pax -->
+    <div class="flight-card" data-oma="3194" data-tipo="Pax" data-reg="XCG" data-trip="Igor" data-rota="Swpd › M. Marauiá › Swpd" data-obs="Vai levando pax para a M. Marauiá.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">XCG</span>
+          <span class="card-num" data-oma="3194">#3194</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Igor</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">M. Marauiá</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando pax para a M. Marauiá.</div>
+      </div>
+    </div>
+
+    <!-- #3195 Carga ×4 -->
+    <div class="flight-card" data-oma="3195" data-tipo="Carga" data-reg="LNS" data-trip="Sérgio" data-rota="Swpd › M. Marauiá ⇄ S. Isabel ×4 › Swpd" data-obs="Vai levando carga para a M. Marauiá.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">LNS</span>
+          <span class="card-num" data-oma="3195">#3195</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Sérgio</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">M. Marauiá</span><span class="rarrow">⇄</span>
+          <span class="rpt">S. Isabel</span>
+          <span class="repeat-marker">×4</span>
+          <span class="rarrow">›</span><span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga para a M. Marauiá.</div>
+      </div>
+    </div>
+
+    <!-- #3196 Carga ×4 -->
+    <div class="flight-card" data-oma="3196" data-tipo="Carga" data-reg="DPD" data-trip="Dayvid" data-rota="Swpd › M. Marauiá ⇄ S. Isabel ×4 › Swpd" data-obs="Vai levando carga para a M. Marauiá.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">DPD</span>
+          <span class="card-num" data-oma="3196">#3196</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Dayvid</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">M. Marauiá</span><span class="rarrow">⇄</span>
+          <span class="rpt">S. Isabel</span>
+          <span class="repeat-marker">×4</span>
+          <span class="rarrow">›</span><span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga para a M. Marauiá.</div>
+      </div>
+    </div>
+
+    <!-- #3197 Carga ×4 -->
+    <div class="flight-card" data-oma="3197" data-tipo="Carga" data-reg="NYA" data-trip="Milton" data-rota="Swpd › M. Marauiá ⇄ S. Isabel ×4 › Swpd" data-obs="Vai levando carga para a M. Marauiá.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">NYA</span>
+          <span class="card-num" data-oma="3197">#3197</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Milton</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">M. Marauiá</span><span class="rarrow">⇄</span>
+          <span class="rpt">S. Isabel</span>
+          <span class="repeat-marker">×4</span>
+          <span class="rarrow">›</span><span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga para a M. Marauiá.</div>
+      </div>
+    </div>
+
+    <!-- #3198 Pax -->
+    <div class="flight-card" data-oma="3198" data-tipo="Pax" data-reg="OJV" data-trip="Adelio" data-rota="Swpd › Marari › Waharo › Swpd" data-obs="Vai levando conselheiros e pacientes de alta.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">OJV</span>
+          <span class="card-num" data-oma="3198">#3198</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Adelio</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Marari</span><span class="rarrow">›</span>
+          <span class="rpt">Waharo</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando conselheiros e pacientes de alta.</div>
+      </div>
+    </div>
+
+    <!-- #3199 Pax -->
+    <div class="flight-card" data-oma="3199" data-tipo="Pax" data-reg="××-××" data-trip="A definir" data-rota="Swpd › Erico › Sauba › Swpd" data-obs="Vai levando conselheiros e pacientes de alta.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg tbd">××-××</span>
+          <span class="card-num" data-oma="3199">#3199</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>A definir</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Erico</span><span class="rarrow">›</span>
+          <span class="rpt">Sauba</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando conselheiros e pacientes de alta.</div>
+      </div>
+    </div>
+
+    <!-- #3200 Pax -->
+    <div class="flight-card" data-oma="3200" data-tipo="Pax" data-reg="××-××" data-trip="A definir" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando conselheiros e pacientes de alta.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg tbd">××-××</span>
+          <span class="card-num" data-oma="3200">#3200</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>A definir</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando conselheiros e pacientes de alta.</div>
+      </div>
+    </div>
+
+    <!-- #3201 Pax com ×2 (Toototobi e Aracá corrigidos) -->
+    <div class="flight-card" data-oma="3201" data-tipo="Pax" data-reg="KAG" data-trip="Gabriel" data-rota="Swpd › Demini › Ajuricaba › Aracá › Toototobi ⇄ Xiroxiro ×2 › Swpd" data-obs="Vai levando conselheiros e pacientes de alta.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">KAG</span>
+          <span class="card-num" data-oma="3201">#3201</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Gabriel</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Demini</span><span class="rarrow">›</span>
+          <span class="rpt">Ajuricaba</span><span class="rarrow">›</span>
+          <span class="rpt">Aracá</span><span class="rarrow">›</span>
+          <span class="rpt">Toototobi</span><span class="rarrow">⇄</span>
+          <span class="rpt">Xiroxiro</span>
+          <span class="repeat-marker">×2</span>
+          <span class="rarrow">›</span><span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando conselheiros e pacientes de alta.</div>
+      </div>
+    </div>
+
+    <!-- #3202 Pax -->
+    <div class="flight-card" data-oma="3202" data-tipo="Pax" data-reg="××-××" data-trip="A definir" data-rota="Swpd › Palimiú › Waikas › Swpd" data-obs="Vai levando conselheiros e pacientes de alta.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg tbd">××-××</span>
+          <span class="card-num" data-oma="3202">#3202</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>A definir</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Palimiú</span><span class="rarrow">›</span>
+          <span class="rpt">Waikas</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando conselheiros e pacientes de alta.</div>
+      </div>
+    </div>
+
+    <!-- #3203 Pax -->
+    <div class="flight-card" data-oma="3203" data-tipo="Pax" data-reg="DNT" data-trip="Lucas" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando pax (Xitei) para Surucucu.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">DNT</span>
+          <span class="card-num" data-oma="3203">#3203</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Lucas</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando pax (Xitei) para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3204 Pax -->
+    <div class="flight-card" data-oma="3204" data-tipo="Pax" data-reg="JSA" data-trip="Costa" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando logística para Surucucu.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">JSA</span>
+          <span class="card-num" data-oma="3204">#3204</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Costa</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando logística para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3205 AGORA PAX (era carga) -->
+    <div class="flight-card" data-oma="3205" data-tipo="Pax" data-reg="××-××" data-trip="A definir" data-rota="Swpd › Auaris › Swpd" data-obs="Vai levando pax para Auaris.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg tbd">××-××</span>
+          <span class="card-num" data-oma="3205">#3205</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>A definir</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Auaris</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando pax para Auaris.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ CARAVAN ══════════════ -->
+<div class="ac-block">
+  <div class="ac-header caravan">
+    <span class="ac-icon">🛩️</span>
+    <span class="ac-name caravan">Caravan 208</span>
+    <span class="ac-count">6 voos</span>
+  </div>
+  <div class="client-block">
+    <div class="client-label">✦ Yanomami</div>
+
+    <!-- #3206 Carga -->
+    <div class="flight-card" data-oma="3206" data-tipo="Carga" data-reg="SLH" data-trip="Perisson / Thales" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando carga (Xitei) para Surucucu.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">SLH</span>
+          <span class="card-num" data-oma="3206">#3206</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Perisson / Thales</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga (Xitei) para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3207 Carga -->
+    <div class="flight-card" data-oma="3207" data-tipo="Carga" data-reg="SLL" data-trip="João / Daniela" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando carga (Xitei, Haxiu, Kataroa, Hokomawe e Surucucu).">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">SLL</span>
+          <span class="card-num" data-oma="3207">#3207</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>João / Daniela</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga (Xitei, Haxiu, Kataroa, Hokomawe e Surucucu).</div>
+      </div>
+    </div>
+
+    <!-- #3208 Carga -->
+    <div class="flight-card" data-oma="3208" data-tipo="Carga" data-reg="SLH" data-trip="Perisson / Thales" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando carga para Surucucu.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">SLH</span>
+          <span class="card-num" data-oma="3208">#3208</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Perisson / Thales</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3209 Carga -->
+    <div class="flight-card" data-oma="3209" data-tipo="Carga" data-reg="SLL" data-trip="João / Daniela" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando carga para Surucucu.">
+      <div class="type-bar carga"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge carga">📦 Carga</span>
+          <span class="card-reg">SLL</span>
+          <span class="card-num" data-oma="3209">#3209</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>João / Daniela</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando carga para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3210 Pax -->
+    <div class="flight-card" data-oma="3210" data-tipo="Pax" data-reg="SLH" data-trip="Perisson / Thales" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando pax para Surucucu.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">SLH</span>
+          <span class="card-num" data-oma="3210">#3210</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>Perisson / Thales</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando pax para Surucucu.</div>
+      </div>
+    </div>
+
+    <!-- #3211 Pax -->
+    <div class="flight-card" data-oma="3211" data-tipo="Pax" data-reg="SLL" data-trip="João / Daniela" data-rota="Swpd › Surucucu › Swpd" data-obs="Vai levando pax para Surucucu.">
+      <div class="type-bar pax"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="type-badge pax">🧍 Pax</span>
+          <span class="card-reg">SLL</span>
+          <span class="card-num" data-oma="3211">#3211</span>
+        </div>
+        <div class="card-crew"><span class="crew-dot"></span>João / Daniela</div>
+        <div class="card-route">
+          <span class="rpt home">Swpd</span><span class="rarrow">›</span>
+          <span class="rpt">Surucucu</span><span class="rarrow">›</span>
+          <span class="rpt home">Swpd</span>
+        </div>
+        <div class="card-obs">Vai levando pax para Surucucu.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ COORDENAÇÃO ══ -->
+<div class="people-section">
+  <div class="people-header coord">🎯 Coordenação</div>
+  <div class="people-body">
+    <span class="person-chip coord">Emerson</span>
+    <span class="person-chip coord">Bispo</span>
+    <span class="person-chip coord">Marcos</span>
+    <span class="person-chip coord">Falcão</span>
+  </div>
+</div>
+
+<!-- ══ STAND BY VOARE ══ -->
+<div class="people-section">
+  <div class="people-header stand-voare">🛫 Stand By — Voare</div>
+  <div class="people-body">
+    <span class="person-chip stand-voare">Costa</span>
+  </div>
+</div>
+
+<!-- ══ STAND BY GERAL ══ -->
+<div class="people-section">
+  <div class="people-header stand-gen">⏳ Stand By</div>
+  <div class="people-body">
+    <span class="person-chip stand-gen">Renan</span>
+    <span class="person-chip stand-gen">Matias</span>
+    <span class="person-chip stand-gen">Frank</span>
+    <span class="person-chip stand-gen">Amarildo</span>
+    <span class="person-chip stand-gen">Házafe</span>
+    <span class="person-chip stand-gen">Andrade</span>
+    <span class="person-chip stand-gen">Ronie</span>
+    <span class="person-chip stand-gen">Leandro</span>
+  </div>
+</div>
+
+<div class="footer">Programação Operacional · 13/06/2026</div>
+
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-title" id="modalTitle">Detalhes do Voo</div>
+    <div class="modal-detail" id="modalDetail"></div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const overlay = document.getElementById('modalOverlay');
+    const closeBtn = document.getElementById('modalClose');
+    const titleEl = document.getElementById('modalTitle');
+    const detailEl = document.getElementById('modalDetail');
+
+    // Fechar modal
+    function closeModal() {
+      overlay.classList.remove('active');
+    }
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeModal();
+    });
+
+    // Abrir modal com dados do voo
+    document.querySelectorAll('.card-num').forEach(el => {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const card = this.closest('.flight-card');
+        if (!card) return;
+
+        const oma = this.getAttribute('data-oma') || '--';
+        const tipo = card.dataset.tipo || '--';
+        const reg = card.dataset.reg || '--';
+        const trip = card.dataset.trip || '--';
+        const rota = card.dataset.rota || '--';
+        const obs = card.dataset.obs || '--';
+
+        titleEl.textContent = `Oma #${oma}`;
+        detailEl.innerHTML = `
+          <p><strong>Tipo:</strong> ${tipo}</p>
+          <p><strong>Matrícula:</strong> ${reg}</p>
+          <p><strong>Comandante:</strong> ${trip}</p>
+          <p><strong>Rota:</strong> <span class="highlight">${rota}</span></p>
+          <p><strong>Observação:</strong> ${obs}</p>
+        `;
+        overlay.classList.add('active');
+      });
+    });
+  })();
+</script>
+
+</body>
+  </html>
