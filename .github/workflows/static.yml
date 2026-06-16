@@ -2,10 +2,9 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: ["main"]          # Altere para "master" se for o caso
-  workflow_dispatch:            # Permite execução manual
+    branches: ["main"]          # ou "master" se for o caso
+  workflow_dispatch:
 
-# Permissões necessárias para Pages
 permissions:
   contents: read
   pages: write
@@ -14,23 +13,20 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    # 🔧 ADICIONADO: força ações a usar Node.js 24 (elimina o warning)
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # força Node.js 24
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar Pages
-        uses: actions/configure-pages@v5
+      - name: (Opcional) Listar arquivos para depuração
+        run: ls -la
 
-      - name: Fazer upload do artefato
-        uses: actions/upload-artifact@v4
+      - name: Fazer upload do artefato para Pages (forma oficial)
+        uses: actions/upload-pages-artifact@v3   # <-- específica para Pages
         with:
-          name: github-pages        # Nome exigido pelo deploy-pages
-          path: .                   # Altere para './public' se seus arquivos estiverem em uma subpasta
+          path: .                               # ou './public' se seus arquivos estiverem lá
 
       - name: Implantar no GitHub Pages
         uses: actions/deploy-pages@v4
